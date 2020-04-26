@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:title="Connect to FTP"
+    android:id="@+id/cnftp"
+    android:icon="@drawable/ic_wifi_black_24dp"/>
+    <item android:title="Connect to Bluetooth"
+        android:id="@+id/cnble"
+        android:icon="@drawable/ic_bluetooth_black"
+        />
+</menu>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <item
+             android:title="Bluetooth Connect"
+             android:icon="@drawable/ic_bluetooth_black_24dp"
+             android:id="@+id/bt_config"/>
+    <item
+        android:title="Wifi Connect"
+        android:icon="@drawable/ic_wifi_black_24dp"
+        android:id="@+id/wifi"/>
+    <item
+        android:title="Send Data To OGICamera"
+        android:icon="@drawable/ic_wifi_black_24dp"
+        android:id="@+id/senddt_ogi"/>
+</menu>
