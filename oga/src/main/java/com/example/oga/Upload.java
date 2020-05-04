@@ -31,7 +31,7 @@ ImageView imageView;
         barcode=findViewById(R.id.upl_barcode);
         imageView=findViewById(R.id.upl_imgview);
         reading=findViewById(R.id.upl_reading);
-        barcode.setText("Component Barcode:"+barcodenumber);
+        barcode.setText(barcodenumber);
         if(currentPhotoPath!=null){
             File image = new File(currentPhotoPath);
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -44,6 +44,7 @@ ImageView imageView;
                 Matrix matrix = new Matrix();
                 if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
                 rotatedBitmap = Bitmap.createBitmap(bitmap,0,0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                imageView.setVisibility(View.VISIBLE);
                 imageView.setImageBitmap(rotatedBitmap);
             }catch(IOException ex){
                 Toast.makeText(this,"Failed to get Exif data",Toast.LENGTH_LONG).show();
@@ -52,7 +53,7 @@ ImageView imageView;
         }else {
             Toast.makeText(this,"Something went wrong",Toast.LENGTH_LONG).show();
         }
-        reading.setText("Component Reading:"+max.toString());
+        reading.setText(max.toString());
 
     }
     private static int exifToDegrees(int exifOrientation) {

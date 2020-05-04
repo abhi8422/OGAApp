@@ -22,7 +22,7 @@ static Double max = 0.0;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leak_quantifire);
         barcode=findViewById(R.id.leak_barcode);
-        barcode.setText("Barcode Number:"+barcodenumber);
+        barcode.setText(barcodenumber);
         Reading=findViewById(R.id.leak_reading);
         MaxReading=findViewById(R.id.max_leakrate);
         leakActivity=true;

@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ConnectFtp"
     >
+
     <EditText
         android:id="@+id/ftp_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:layout_marginTop="16dp"
         android:hint="Enter FTP Url"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,6 +23,7 @@
         android:id="@+id/ftp_pass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:hint="Enter Password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -31,6 +34,7 @@
         android:id="@+id/ftp_port"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:hint="Enter FTP Port"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -41,6 +45,7 @@
         android:id="@+id/ftp_usr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:hint="Enter User Name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -51,16 +56,21 @@
         android:id="@+id/file_location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:hint="Enter remote file location"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/ftp_pass"
-        tools:layout_editor_absoluteX="-16dp"
-        android:visibility="gone"/>
+        tools:layout_editor_absoluteX="-16dp" />
 
     <Button
         android:id="@+id/btn_connect_ftp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/button_layout"
         android:text="connect"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/file_location" />
@@ -69,7 +79,11 @@
         android:id="@+id/btn_download"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/button_layout"
         android:text="download file"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -77,10 +91,12 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_connect_ftp" />
 
     <ListView
-        android:visibility="gone"
         android:id="@+id/list_view"
         android:layout_width="411dp"
         android:layout_height="190dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/list_border"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
