@@ -102,8 +102,12 @@
                     android:src="@drawable/camera_black"
                     android:tint="@color/colorPrimary" />
             </LinearLayout>
-
+<androidx.viewpager.widget.ViewPager
+    android:id="@+id/img_viewPager"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"/>
             <ImageView
+                android:visibility="gone"
                 android:id="@+id/imageview"
                 android:layout_width="306dp"
                 android:layout_height="202dp"

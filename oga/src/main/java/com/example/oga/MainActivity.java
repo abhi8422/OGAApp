@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -64,6 +65,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -79,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageview;
     public static String currentPhotoPath;
     public static String barcodenumber;
+    public ArrayList<String> imgpath=new ArrayList<>();
+    ViewPager viewPager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,13 +93,29 @@ public class MainActivity extends AppCompatActivity {
         /* Location API Calling*/
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         /* Location API Calling*/
-        getLastLocation();
-        if((ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)&& (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED)&& (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)!= PackageManager.PERMISSION_GRANTED)){
+//        getLastLocation();
+        /*if((ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)&&
+                (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED)&&
+                (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)!= PackageManager.PERMISSION_GRANTED)){
             RequestPermission();
+        }*/
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
+            RequestPermission();
+        }else if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            RequestPermission();
+        }else if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)!= PackageManager.PERMISSION_GRANTED){
+            RequestPermission();
+        }else if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){
+            RequestPermission();
+        }else {
+            getLastLocation();
         }
+        //viewpager for image view
+     viewPager=findViewById(R.id.img_viewPager);
+
     }
     private void RequestPermission() {
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA,Manifest.permission.BLUETOOTH},101);
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA,Manifest.permission.BLUETOOTH,Manifest.permission.ACCESS_FINE_LOCATION},101);
     }
 
     public void barcodeShow(View view) {
@@ -148,31 +168,13 @@ public class MainActivity extends AppCompatActivity {
             barcode.setText(result.getContents());
         }
         if(requestCode==12){
-            File curFile = new File(currentPhotoPath);
-            Bitmap bitmap= BitmapFactory.decodeFile(curFile.getAbsolutePath());
-            Bitmap rotatedBitmap;
-            try {
-                ExifInterface exif = new ExifInterface(curFile.getPath());
-                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                int rotationInDegrees = exifToDegrees(rotation);
-                Matrix matrix = new Matrix();
-                if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
-                rotatedBitmap = Bitmap.createBitmap(bitmap,0,0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                imageview.setVisibility(View.VISIBLE);
-                imageview.setImageBitmap(rotatedBitmap);
-            }catch(IOException ex){
-                Log.e(TAG, "Failed to get Exif data", ex);
-            }
-
+            imgpath.add(currentPhotoPath);
+            ImageAdapter imageAdapter=new ImageAdapter(this,imgpath);
+            viewPager.setAdapter(imageAdapter);
         }
     }
 
-    private static int exifToDegrees(int exifOrientation) {
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) { return 90; }
-        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
-        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
-        return 0;
-    }
+
 
 
 
@@ -200,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
     /* Changes for the GPS Co-ordinates */
     @SuppressLint("MissingPermission")
     private void getLastLocation() {
-        if (checkPermissions()){
             if (isLocationEnabled()){
                 fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
                     @Override
@@ -222,10 +223,6 @@ public class MainActivity extends AppCompatActivity {
 //                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
             }
         }
-        else {
-            requestPermissions();
-        }
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.DONUT)
     private void displayLocationSettingsRequest(Context context) {
@@ -309,11 +306,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_ID){
+
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this,"PerMission is granted",Toast.LENGTH_SHORT).show();
                 getLastLocation();
             }
-        }
+
     }
 
 }
