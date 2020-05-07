@@ -25,23 +25,30 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Upload"
-            android:label="Upload" />
+            android:label="Upload"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".LeakQuantifire"
-            android:label="Leak Quantifire" />
+            android:label="Leak Quantifire"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Bluetooth"
-            android:label="Bluetooth Connection" />
+            android:label="Bluetooth Connection"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ConnectFtp"
-            android:label="Connect FTP" />
+            android:label="Connect FTP"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".VideoDownload"
-            android:label="Video Download" />
-        <activity android:name=".ScannerActivity" />
+            android:label="Video Download"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".ScannerActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MainActivity"
-            android:label="Component Info">
+            android:label="Component Info"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

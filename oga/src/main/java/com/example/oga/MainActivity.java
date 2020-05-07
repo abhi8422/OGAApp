@@ -11,6 +11,7 @@ import androidx.core.content.FileProvider;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.ExifInterface;
@@ -28,13 +30,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,11 +71,18 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    public boolean captured = false;
+    ImageView Camera_click;
+    Bitmap rotatedBitmap;
     EditText barcode;
     TextView GPS_Coordinates;
     public  static float LAT,LNG;
@@ -86,13 +99,121 @@ public class MainActivity extends AppCompatActivity {
         barcode=findViewById(R.id.edt_barcode);
         GPS_Coordinates=findViewById(R.id.gps_coordinates);
         imageview=findViewById(R.id.imageview);
-        /* Location API Calling*/
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        /* Location API Calling*/
-        getLastLocation();
+        Camera_click=findViewById(R.id.camera_click);
+        Dexter.withActivity(this).withPermissions(READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,ACCESS_FINE_LOCATION,CAMERA).withListener(new MultiplePermissionsListener() {
+            @Override
+            public void onPermissionsChecked(MultiplePermissionsReport report) {
+                if (report.areAllPermissionsGranted()){
+                    /* Location API Calling*/
+                    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
+                    /* Location API Calling*/
+
+                    /* Location Changes */
+                    getLastLocation();
+                    /* Location Changes */
+                }
+                if (report.isAnyPermissionPermanentlyDenied()){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Need Permissions");
+                    builder.setMessage("This app needs these permissions. You can grant them in app settings.");
+                    builder.setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            openSettings();
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            moveTaskToBack(true);
+                            dialog.cancel();
+                            finish();
+                        }
+                    });
+                    builder.show();
+                }
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                token.continuePermissionRequest();
+            }
+        }).onSameThread().check();
+
+        Camera_click.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                        // startActivityForResult(takePictureIntent,111);
+                        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                        String imageFileName = "JPEG_" + timeStamp + "_";
+                        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                        File imageFile = null;
+                        try {
+                            imageFile = File.createTempFile(
+                                    imageFileName,  /* prefix */
+                                    ".jpg",         /* suffix */
+                                    storageDir      /* directory */
+                            );
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        // Save a file: path for use with ACTION_VIEW intents
+                        currentPhotoPath = imageFile.getAbsolutePath();
+                        System.out.println(barcode.getText().toString());
+                        if (imageFile != null ) {
+                            Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
+                                    "com.example.oga",
+                                    imageFile);
+                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                            startActivityForResult(takePictureIntent, 12);
+                        }
+                    }
+            }
+        });
+
         if((ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)&& (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED)&& (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)!= PackageManager.PERMISSION_GRANTED)){
             RequestPermission();
         }
+
+        imageview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (captured){
+                    final Dialog builder = new Dialog(MainActivity.this);
+                    builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    builder.getWindow().setBackgroundDrawable(
+                            new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//                uri=Uri.fromFile(new File(OP.getAbsolutePath()));
+                    BitmapFactory.Options opts;
+                    builder.setContentView(R.layout.dialog_layout);
+                    ImageButton close=builder.findViewById(R.id.btnClose);
+
+                    ImageView img = builder.findViewById(R.id.Img);
+                    img.getLayoutParams().height= ViewGroup.LayoutParams.WRAP_CONTENT;
+                    img.getLayoutParams().width=ViewGroup.LayoutParams.WRAP_CONTENT;
+                    img.setAdjustViewBounds(false);
+
+//                img.setImageURI(uri);
+                    img.setImageBitmap(rotatedBitmap);
+                    close.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            builder.dismiss();
+                        }
+                    });
+
+                    builder.show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "No Image Captured", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
     private void RequestPermission() {
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA,Manifest.permission.BLUETOOTH},101);
@@ -104,35 +225,7 @@ public class MainActivity extends AppCompatActivity {
         integrator.initiateScan();
     }
 
-    public void imageClick(View view) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // startActivityForResult(takePictureIntent,111);
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String imageFileName = "JPEG_" + timeStamp + "_";
-            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File imageFile = null;
-            try {
-                imageFile = File.createTempFile(
-                        imageFileName,  /* prefix */
-                        ".jpg",         /* suffix */
-                        storageDir      /* directory */
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            // Save a file: path for use with ACTION_VIEW intents
-            currentPhotoPath = imageFile.getAbsolutePath();
-            if (imageFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.oga",
-                        imageFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, 12);
-            }
-        }
-    }
 
     public void Save(View view) {
        barcodenumber=barcode.getText().toString();
@@ -144,26 +237,26 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if(result!=null){
+            getLastLocation();
             barcodenumber=result.getContents();
             barcode.setText(result.getContents());
         }
         if(requestCode==12){
             File curFile = new File(currentPhotoPath);
             Bitmap bitmap= BitmapFactory.decodeFile(curFile.getAbsolutePath());
-            Bitmap rotatedBitmap;
-            try {
-                ExifInterface exif = new ExifInterface(curFile.getPath());
-                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                int rotationInDegrees = exifToDegrees(rotation);
-                Matrix matrix = new Matrix();
-                if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
-                rotatedBitmap = Bitmap.createBitmap(bitmap,0,0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                imageview.setVisibility(View.VISIBLE);
-                imageview.setImageBitmap(rotatedBitmap);
-            }catch(IOException ex){
-                Log.e(TAG, "Failed to get Exif data", ex);
+                try {
+                    ExifInterface exif = new ExifInterface(curFile.getPath());
+                    int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                    int rotationInDegrees = exifToDegrees(rotation);
+                    Matrix matrix = new Matrix();
+                    if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
+                    rotatedBitmap = Bitmap.createBitmap(bitmap,0,0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    imageview.setVisibility(View.VISIBLE);
+                    captured=true;
+                    imageview.setImageBitmap(rotatedBitmap);
+                }catch(IOException ex){
+                    Log.e(TAG, "Failed to get Exif data", ex);
             }
-
         }
     }
 
@@ -314,6 +407,13 @@ public class MainActivity extends AppCompatActivity {
                 getLastLocation();
             }
         }
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package",getPackageName(),null);
+        intent.setData(uri);
+        startActivityForResult(intent,101);
     }
 
 }
