@@ -39,8 +39,6 @@ public class ConnectFtp extends AppCompatActivity implements View.OnClickListene
 
         if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.INTERNET)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.INTERNET},101);
-        }else {
-
         }
         ftpclient = new FtpServerConnection();
         findViewById(R.id.btn_connect_ftp).setOnClickListener(new View.OnClickListener() {
